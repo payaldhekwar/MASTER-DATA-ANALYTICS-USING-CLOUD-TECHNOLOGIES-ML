@@ -1,1 +1,342 @@
+create DATABASE Bikestores;
+USE Bikestores;
+
+CREATE OR REPLACE SCHEMA Sales;
+CREATE OR REPLACE SCHEMA Production;
+--table creation in sales--
+
+
+CREATE OR REPLACE TABLE  Sales.customers
+(customer_id int AUTOINCREMENT,
+ first_name VARCHAR(50),
+ last_name VARCHAR(50),
+ phone VARCHAR(15),
+ email VARCHAR(60),
+ street VARCHAR(100),
+ city VARCHAR(50),
+ state VARCHAR(50),
+ zip_code VARCHAR(50),
+ PRIMARY KEY(customer_id)
+);
+
+CREATE OR REPLACE TABLE Sales.orders
+ (
+  order_id VARCHAR(50) NOT NULL PRIMARY KEY,
+  customer_id VARCHAR(15),
+  order_status VARCHAR(50),
+  order_date DATE,
+  required_date DATE,
+  shipped_date DATE,
+  store_id INT,
+  staff_id INT
+);
+
+CREATE TABLE if not exists Sales.staffs
+(
+ staff_id INT PRIMARY KEY,
+ first_name VARCHAR(50),
+ last_name VARCHAR(50),
+ phone VARCHAR(15),
+ email VARCHAR(60),
+ active VARCHAR(100),
+ store_id INT,
+ manager_id INT
+ );
+
+CREATE TABLE if not exists Sales.stores
+(
+ store_id int AUTOINCREMENT PRIMARY KEY,
+ store_name VARCHAR(50),
+ phone VARCHAR(15),
+ email VARCHAR(60),
+ street VARCHAR(100),
+ city VARCHAR(50),
+ state VARCHAR(50),
+ zip_code INT
+);
+
+CREATE TABLE if not exists Sales.order_items
+(
+order_id INT,
+ item_id INT,
+ product_id INT,
+ quantity VARCHAR(50),
+ list_price VARCHAR(50),
+discount VARCHAR(50),
+ primary key(order_id, item_id)
+);
+
+--CREATING PRODUCTION TABLE  --
+
+CREATE TABLE Production.categories
+(
+   category_id INT PRIMARY KEY,
+   category_name VARCHAR(60)
+);
+
+CREATE TABLE Production.products
+(
+   product_id INT PRIMARY KEY,
+   product_name VARCHAR(100),
+   brand_id INT,
+   category_id INT,
+   model_year INT,
+   list_price VARCHAR(50)
+);
+
+CREATE TABLE Production.stocks
+(
+ store_id INT,
+ product_id INT,
+ quantity VARCHAR(50),
+ PRIMARY KEY(store_id, product_id)
+);
+
+
+CREATE TABLE if not exists Production.brands
+(
+ brand_id  INT PRIMARY KEY,
+ brand_name VARCHAR(100)
+);
+
+SELECT * FROM BIKESTORES.SALES.STORES;
+SELECT * FROM BIKESTORES.SALES.STAFFS;
+SELECT * FROM BIKESTORES.SALES.ORDER_ITEMS;
+SELECT * FROM BIKESTORES.SALES.CUSTOMERS;
+SELECT * FROM BIKESTORES.PRODUCTION.BRANDS;
+SELECT * FROM BIKESTORES.PRODUCTION.CATEGORIES;
+SELECT * FROM BIKESTORES.PRODUCTION.PRODUCTS;
+SELECT * FROM BIKESTORES.PRODUCTION.STOCKS;
+
+
+
+
+/*.2. Once the table has got created , there is a requirement of FOREIGN KEY implementation coming
+into picture where one needs to add(ALTER TABLE COMMAND) below foreign key on the table
+mentioned pointing to another table (READ ABOUT FOREIGN KEY) as :*/
+
+--sales.staffs (store_id) -> sales.stores(storeid)--
+ALTER TABLE Sales.staffs ADD FOREIGN KEY(store_id) REFERENCES Sales.stores(store_id);
+
+--sales.staffs (manager_id) -> sales.staffs (staff_id)--
+ALTER TABLE Sales.staffs ADD FOREIGN KEY (manager_id) REFERENCES Sales.staffs(staff_id);
+
+--production.products (category_id) -> production.categories (category_id)--
+ALTER TABLE production.products ADD FOREIGN KEY (category_id) REFERENCES production.categories(category_id);
+
+--production.products(brand_id) -> Production_brands (brand_id)
+ALTER TABLE Production.products ADD FOREIGN KEY (brand_id) REFERENCES Production.brands(brand_id);
+
+--sales.orders (customer_id) -> sales.customers (customer_id)
+ALTER TABLE Sales.orders ADD FOREIGN KEY (customer_id) REFERENCES Sales.customers(customer_id);
+
+--sales.orders(store_id) -> sales.stores (store_id)
+ALTER TABLE Sales.orders ADD FOREIGN KEY (store_id) REFERENCES Sales.stores(store_id);
+
+--sales.orders (staff_id) -> sales.staffs (staff_id)
+ALTER TABLE Sales.orders ADD FOREIGN KEY (staff_id) REFERENCES Sales.staffs(staff_id);
+
+--sales.order_items(order_id) -> sales.orders (order_id)
+ALTER TABLE Sales.order_items ADD FOREIGN KEY (order_id) REFERENCES Sales.orders(order_id);
+
+--sales.order_items (product_id) -> production.products (product_id)
+ALTER TABLE Sales.order_items ADD FOREIGN KEY (product_id) REFERENCES Production.products(product_id);
+
+--production.stocks (store_id) -> sales.stores (store_id)
+ALTER TABLE Production.stocks ADD FOREIGN KEY (store_id) REFERENCES Sales.stores(store_id);
+
+--production.stocks (product_id) -> production.products (product_id)
+ALTER TABLE Production.stocks ADD FOREIGN KEY (product_id) REFERENCES Production.products(product_id);
+
+
+
+/*3. Does any of the table has missing or NULL value ? If yes which are those and what are their
+counts ?*/
+--SALES SCHEMA--
+SELECT COUNT(*) AS TOT_NULL_CUSTOMER FROM BIKESTORES.SALES.CUSTOMERS WHERE CUSTOMER_ID IS NULL OR FIRST_NAME IS NULL OR LAST_NAME IS NULL OR PHONE IS NULL OR EMAIL IS NULL OR STREET IS NULL OR CITY IS NULL OR STATE IS NULL OR CITY IS NULL OR ZIP_CODE IS NULL;
+
+SELECT COUNT(*) AS TOT_NULL_ORDERS FROM BIKESTORES.SALES.ORDERS WHERE ORDER_ID IS NULL OR CUSTOMER_ID IS NULL OR ORDER_STATUS IS NULL OR ORDER_DATE IS NULL OR REQUIRED_DATE IS NULL OR SHIPPED_DATE IS NULL OR STORE_ID IS NULL OR STAFF_ID IS NULL;
+
+SELECT COUNT(*) AS TOT_NULL_ORDER_ITEMS FROM BIKESTORES.SALES.ORDER_ITEMS WHERE ORDER_ID IS NULL OR ITEM_ID IS NULL OR PRODUCT_ID IS NULL OR QUANTITY IS NULL OR LIST_PRICE IS NULL OR DISCOUNT IS NULL OR TOTAL_PRICE IS NULL;
+
+SELECT COUNT(*) AS TOT_NULL_STAFFS FROM BIKESTORES.SALES.STAFFS WHERE FIRST_NAME IS NULL OR LAST_NAME IS NULL OR PHONE IS NULL OR EMAIL IS NULL OR ACTIVE IS NULL;
+
+SELECT COUNT(*) AS TOT_NULL_STORES FROM BIKESTORES.SALES.STORES WHERE STORE_ID IS NULL OR STORE_NAME IS NULL OR PHONE IS NULL OR EMAIL IS NULL OR STREET IS NULL OR CITY IS NULL OR STATE IS NULL OR ZIP_CODE IS NULL;
+ 
+--PRODUCTION SCHEMA--
+SELECT COUNT(*) AS TOT_NULL_BRANDS FROM BIKESTORES.PRODUCTION.BRANDS WHERE BRAND_ID IS NULL OR BRAND_NAME IS NULL;
+
+SELECT COUNT(*) AS TOT_NULL_CATEGORIES FROM BIKESTORES.PRODUCTION.CATEGORIES WHERE CATEGORY_ID IS NULL OR CATEGORY_NAME IS NULL;
+
+SELECT COUNT(*) AS TOT_NULL_PRODUCTS FROM BIKESTORES.PRODUCTION.PRODUCTS WHERE PRODUCT_ID IS NULL OR PRODUCT_NAME IS NULL OR BRAND_ID IS NULL OR CATEGORY_ID IS NULL OR MODEL_YEAR IS NULL OR LIST_PRICE IS NULL;
+
+SELECT COUNT(*) AS TOT_NULL_STOCKS FROM BIKESTORES.PRODUCTION.STOCKS WHERE STORE_ID IS NULL OR PRODUCT_ID IS NULL OR QUANTITY IS NULL;
+
+
+
+
+/*4.Does the datasets has any DUPLICATE(identical rows) ? If yes – can you just keep the first record
+and remove all rest if its possible without using any JOINS or WINDOW function*/
+
+
+--CUSTOMERS--
+SELECT COUNT(DISTINCT CUSTOMER_ID, FIRST_NAME, LAST_NAME, PHONE, EMAIL, STREET, CITY, STATE, ZIP_CODE) FROM BIKESTORES.SALES.CUSTOMERS; --1445--
+
+SELECT COUNT(FIRST_NAME, LAST_NAME, PHONE, EMAIL, STREET, CITY, STATE, ZIP_CODE) FROM SALES.CUSTOMERS; --1445--
+
+--ORDERS--
+SELECT COUNT(ORDER_ID, CUSTOMER_ID, ORDER_STATUS, ORDER_DATE, REQUIRED_DATE, SHIPPED_DATE, STORE_ID, STAFF_ID) FROM BIKESTORES.SALES.ORDERS; --1445--
+
+SELECT COUNT(DISTINCT ORDER_ID, CUSTOMER_ID, ORDER_STATUS, ORDER_DATE, REQUIRED_DATE, SHIPPED_DATE, STORE_ID, STAFF_ID) FROM BIKESTORES.SALES.ORDERS; --1445--
+
+--ORDERS_ITEMS--
+SELECT COUNT(ORDER_ID, ITEM_ID, PRODUCT_ID, QUANTITY, LIST_PRICE, DISCOUNT) FROM BIKESTORES.SALES.ORDER_ITEMS; --4722--
+SELECT COUNT(DISTINCT ORDER_ID, ITEM_ID, PRODUCT_ID, QUANTITY, LIST_PRICE, DISCOUNT) FROM BIKESTORES.SALES.ORDER_ITEMS; --4722-
+
+--STAFF--
+SELECT COUNT(STAFF_ID, FIRST_NAME, LAST_NAME, PHONE, EMAIL, ACTIVE, STORE_ID, MANAGER_ID) FROM BIKESTORES.SALES.STAFFS; --10--
+SELECT COUNT(DISTINCT STAFF_ID, FIRST_NAME, LAST_NAME, PHONE, EMAIL, ACTIVE, STORE_ID, MANAGER_ID) FROM BIKESTORES.SALES.STAFFS; --10--
+
+--STORES--
+SELECT COUNT(STORE_ID, STORE_NAME, PHONE, EMAIL, STREET, CITY, STATE, ZIP_CODE) FROM BIKESTORES.SALES.STORES; --3--
+SELECT COUNT(DISTINCT STORE_ID, STORE_NAME, PHONE, EMAIL, STREET, CITY, STATE, ZIP_CODE) FROM BIKESTORES.SALES.STORES; --3--
+
+
+--BRANDS--
+SELECT COUNT(BRAND_ID, BRAND_NAME) FROM BIKESTORES.PRODUCTION.BRANDS; --9--
+SELECT COUNT(DISTINCT BRAND_ID, BRAND_NAME) FROM BIKESTORES.PRODUCTION.BRANDS; --9--
+
+--CATEGORIES--
+SELECT COUNT(CATEGORY_ID, CATEGORY_NAME) FROM BIKESTORES.PRODUCTION.CATEGORIES; --7--
+SELECT COUNT(DISTINCT CATEGORY_ID, CATEGORY_NAME) FROM BIKESTORES.PRODUCTION.CATEGORIES; --7--
+
+--PRODUCTS--
+SELECT COUNT(PRODUCT_ID, PRODUCT_NAME, BRAND_ID, CATEGORY_ID, MODEL_YEAR, LIST_PRICE)
+FROM BIKESTORES.PRODUCTION.PRODUCTS; --321--
+SELECT COUNT(DISTINCT PRODUCT_ID, PRODUCT_NAME, BRAND_ID, CATEGORY_ID, MODEL_YEAR, LIST_PRICE)
+FROM BIKESTORES.PRODUCTION.PRODUCTS; --321--
+
+--STOCKS--
+SELECT COUNT(STORE_ID, PRODUCT_ID, QUANTITY) FROM BIKESTORES.PRODUCTION.STOCKS; --939--
+SELECT COUNT(DISTINCT STORE_ID, PRODUCT_ID, QUANTITY) FROM BIKESTORES.PRODUCTION.STOCKS; --939--
+
+
+
+/*5.How many unique tables are present in each schema and under each table how many records are
+we having ? (Write SQL Script for the same – I don’t need answer like 3/5/4 etc)*/
+
+--production schema--
+USE SCHEMA PRODUCTION;
+SHOW TABLES; 
+
+--sales schema--
+USE SCHEMA SALES;
+SHOW TABLES; 
+
+
+--6.How many total serving customer BikeStore has ?--
+SELECT COUNT(CUSTOMER_ID) AS TOT_SERVING_CUSTOMERS FROM BIKESTORES.SALES.CUSTOMERS; --1445--
+
+
+--7.How many total orders are there ?--
+SELECT COUNT(ORDER_ID) FROM BIKESTORES.SALES.ORDERS;--1615--
+
+
+--8. Which store has the highest number of sales ?--
+
+SELECT O.STORE_ID,SUM(I.LIST_PRICE * I.QUANTITY-I.DISCOUNT) AS TOT_SALES 
+FROM BIKESTORES.SALES.ORDERS O,BIKESTORES.SALES.ORDER_ITEMS I
+WHERE O.ORDER_ID= I.ORDER_ID
+GROUP BY 1
+ORDER BY 2 DESC
+LIMIT 1;
+
+
+
+
+--9. Which month the sales was highest and for which store ?--
+
+SELECT o.STORE_ID AS STORE_ID, MONTHNAME(o.ORDER_DATE) AS `MONTH`, SUM(i.LIST_PRICE * i.QUANTITY - i.DISCOUNT) AS TOT_SALES 
+FROM BIKESTORES.SALES.ORDERS o,BIKESTORES.SALES.ORDER_ITEMS i
+WHERE o.ORDER_ID = i.ORDER_ID                                
+GROUP BY STORE_ID,`MONTH`  
+ORDER BY TOT_SALES DESC
+LIMIT 1;
+--TOT SALES IN APRIL IS 804633.1 WHICH IS HIGHEST--
+
+
+
+
+
+/* 10. How many orders each customer has placed (give me top 10 customers)*/
+
+SELECT CUSTOMER_ID, COUNT(distinct ORDER_ID) AS ORDERS_PLACED FROM BIKESTORES.SALES.ORDERS 
+GROUP BY 1
+ORDER BY 2 DESC
+LIMIT 10;
+
+
+/* 11.Which are the TOP 3 selling product ?*/
+SELECT PRODUCT_ID,SUM(LIST_PRICE * QUANTITY-DISCOUNT) AS TOT_SALES FROM BIKESTORES.SALES.ORDER_ITEMS
+GROUP BY PRODUCT_ID
+ORDER BY TOT_SALES DESC 
+LIMIT 3;                  ---7=>615,988.44, 9=>434,988.03 & 4=>414,687.65--
+
+
+/*12. Which was the first and last order placed by the customer who has placed maximum number of
+orders ?*/
+SELECT CUSTOMER_ID,COUNT(ORDER_ID) AS NO_OF_ORDERS,MIN(ORDER_ID) AS FIRST_ORDER, MAX(ORDER_ID) AS LAST_ORDER FROM BIKESTORES.SALES.ORDERS
+GROUP BY CUSTOMER_ID
+ORDER BY COUNT(ORDER_ID) DESC
+LIMIT 1;
+---17	1549	301--
+
+
+/*13. For every customer , which is the cheapest product and the costliest product which the
+customer has bought.*/
+SELECT  O.CUSTOMER_ID,
+MIN(I.LIST_PRICE) AS CHEAPEST_PRODUCT_VALUE,
+MAX(I.LIST_PRICE) AS COSTLIEST_PRODUCT_VALUE
+FROM BIKESTORES.SALES.ORDERS O, BIKESTORES.SALES.ORDER_ITEMS I
+WHERE O.ORDER_ID= I.ORDER_ID
+GROUP BY 1;
+
+
+
+
+
+--cheecking cheapest & costlist product--
+SELECT ITEM_ID,PRODUCT_ID,MIN(LIST_PRICE) AS CHEAPEST_PRODUCT_VALUE
+FROM BIKESTORES.SALES.ORDER_ITEMS
+GROUP BY 1,2
+order by 3;
+--3	10	15
+
+SELECT  ITEM_ID, PRODUCT_ID,
+MAX(LIST_PRICE) AS COSTLIEST_PRODUCT_VALUE
+FROM BIKESTORES.SALES.ORDER_ITEMS
+GROUP BY 1,2
+LIMIT 1;
+--3	10	1549--
+
+
+
+/*14. Which product has orders more than 200 ?*/
+
+SELECT product_id,count(distinct order_id) as tot_orders FROM BIKESTORES.SALES.ORDER_ITEMS 
+GROUP BY 1
+having count(order_id)>=200
+order by 2;
+
+/*15.Add a column TOTAL_PRICE with appropriate data type into the sales.order_items*/
+
+ALTER TABLE BIKESTORES.SALES.ORDER_ITEMS ADD TOTAL_PRICE VARCHAR(50);
+
+/*16.Calculate TOTAL_PRICE = quantity * list price and Update the value for all rows in the
+sales.order_items table.*/
+
+UPDATE BIKESTORES.SALES.ORDER_ITEMS SET TOTAL_PRICE=QUANTITY*LIST_PRICE;
+
+--17.What is the value of the TOTAL_PRICE paid for all the sales.order_items ? --
+SELECT SUM(TOTAL_PRICE) FROM BIKESTORES.SALES.ORDER_ITEMS;
 
