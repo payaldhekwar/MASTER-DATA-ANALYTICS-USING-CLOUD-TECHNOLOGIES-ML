@@ -1,1 +1,67 @@
 
+
+----TABLE CREATION---
+USE DEMO_DATABASE;
+
+CREATE OR REPLACE TABLE employees (
+ employee_id INT PRIMARY KEY,
+ first_name VARCHAR(50),
+ last_name VARCHAR(50),
+ department VARCHAR(50),
+ hire_date DATE,
+ salary INT
+);
+
+----DATA INSERTION----
+INSERT INTO employees (employee_id, first_name, last_name, department, hire_date, salary)
+VALUES
+ (1, 'John', 'Doe', 'HR', '2020-01-15', 50000),
+ (2, 'Jane', 'Smith', 'IT', '2019-04-20', 60000),
+ (3, 'Michael', 'Johnson', 'Finance', '2021-08-10', 55000),
+ (4, 'Emily', 'Davis', 'Marketing', '2018-02-05', 52000),
+ (5, 'David', 'Wilson', 'IT', '2022-03-30', 62000);
+
+ SELECT * FROM DEMO_DATABASE.PUBLIC.EMPLOYEES;
+
+---1. Retrieve the first and last names of all employees.---
+SELECT FIRST_NAME,LAST_NAME FROM EMPLOYEES;
+
+
+--2. Find the total number of employees in the company.--
+SELECT COUNT(EMPLOYEE_ID) FROM EMPLOYEES;
+--There are total 5 employees in company --
+
+
+--3.Get the names of employees who work in the IT department.--
+SELECT CONCAT(FIRST_NAME,' ',LAST_NAME) AS EMPLOYEE_NAME, DEPARTMENT FROM DEMO_DATABASE.PUBLIC.EMPLOYEES 
+WHERE DEPARTMENT= 'IT'
+;
+
+
+--4. Calculate the average salary of all employees.--
+SELECT ROUND(AVG(SALARY),1) AS AVG_SALARY FROM EMPLOYEES;
+
+
+
+--5. Find the employee with the highest salary--
+--method 1--
+SELECT EMPLOYEE_ID, CONCAT(FIRST_NAME,' ',LAST_NAME) AS EMPLOYEE_NAME,SALARY
+FROM DEMO_DATABASE.PUBLIC.EMPLOYEES
+ORDER BY  3 DESC
+LIMIT 1;
+
+--method2--
+
+SELECT CONCAT(FIRST_NAME,' ',LAST_NAME) AS NAME, MAX(SALARY) AS HIGHEST_SALARY 
+FROM DEMO_DATABASE.PUBLIC.EMPLOYEES
+GROUP BY 1
+ORDER BY 2 DESC                        --(here GROUP BY is optional)--
+LIMIT 1;
+
+
+
+
+--6. List the employees hired before January 1, 2021, along with their hire dates.--
+SELECT EMPLOYEE_ID,CONCAT(FIRST_NAME,' ',LAST_NAME) AS EMPLOYEE_NAME, HIRE_DATE
+FROM DEMO_DATABASE.PUBLIC.EMPLOYEES
+WHERE HIRE_DATE < '2020-01-01';
